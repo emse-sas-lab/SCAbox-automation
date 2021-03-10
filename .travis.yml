@@ -1,0 +1,29 @@
+language: python
+python:
+- 3.6
+install:
+- pip install sphinx sphinx_rtd_theme sphinx-argparse recommonmark
+- pip install -r requirements.txt
+
+scripts:
+- echo "Unit testing..."
+- cd src
+- python -m unittest tests.test_aes
+- python -m unittest tests.test_traces
+- cd ..
+- echo "Generating documentation..."
+- cd docs/sources
+- make html
+- cd ../build/html
+- touch .nojekyll
+- cd ../../../
+
+deploy:
+  provider: pages:git
+  email: sami@dahoux.net
+  local_dir: docs/build/html
+  github_token: $GH_PAGES_TOKEN
+  keep_history: true
+  edge: true
+  on:
+    branch: master
