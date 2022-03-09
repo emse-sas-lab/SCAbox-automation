@@ -6,9 +6,11 @@ import os
 import threading as th
 import time
 import traceback
+import sys
 from datetime import datetime, timedelta
 from enum import Enum, auto, Flag
 from tkinter import *
+
 
 import numpy as np
 import serial_asyncio
@@ -131,6 +133,7 @@ class AppSerial(asyncio.Protocol):
         logging.info("resuming reading...")
 
     def data_received(self, data):
+
         self.buffer += data
         if self.buffer[-16:].find(Keywords.END_ACQ_TAG) != -1:
             self.t_end = time.perf_counter()
@@ -153,8 +156,11 @@ class AppSerial(asyncio.Protocol):
         self.iterations = 0
         self.t_start = time.perf_counter()
 
+        self.transport.serial.write(b"\r\n")
+        self.transport.serial.write(b"\r\n")
+        self.transport.serial.write(b"\r\n")
+        time.sleep(1)
         self.transport.serial.write(buffer + b"\r\n")
-
 
 class App(Tk):
     def __init__(self, loop, request, interval=1 / 60):
@@ -756,7 +762,7 @@ if __name__ == "__main__":
     lo = asyncio.get_event_loop()
     app = App(lo, request=Request(argp.parse_args()))
     app.title("SCABox Demo")
-    app.geometry("1200x800")
+    app.geometry("1200x600")
     try:
         lo.run_forever()
     except KeyboardInterrupt:
